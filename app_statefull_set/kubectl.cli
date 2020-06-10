@@ -1,0 +1,75 @@
+kubectl version
+
+# Info
+kubectl cluster-info
+kubectl cluster-info dump -o yaml|less
+kubectl config current-context
+
+# Intégrations
+kubectl run -it ubuntu --image=ubuntu:18.04 --rm
+> docker container run -it ...
+kubectl logs -f ubuntu
+> docker container logs -f 
+kubectl exec -it ubuntu -- bash
+> docker container exec -it ...
+kubectl attach ubuntu -it
+> docker container attach -it ...
+
+# Les pods
+kubectl create -f pods.yaml --validate
+# --validate
+# --dry-run
+
+# Les get
+kubectl get pods|nodes|deploy
+
+# La réentrance
+kubectl create deployment nginx --image nginx:1.18 --dry-run -o yaml > nginx-deployment.yaml
+kubectl expose deployment app1 --type=NodePort --port='8066' --target-port='80' --dry-run=client -o yaml > service.yaml
+
+# Collecter des informations
+kubectl describe deployments.apps app1
+kubectl describe pods app1-85f8f47f7-9zrmz
+kubectl logs app1-85f8f47f7-9zrmz db
+
+# Exemple de suppression
+kubectl delete -f nginx-deployment.yaml
+kubectl delete deployment nginx
+
+# Multiple Pods
+kubectl exec -it app1-5ffc65f779-78g88 -c php73fpm -- bash
+kubectl exec -it app1-5ffc65f779-78g88 -c nginx -- bash
+
+## Rolling-update
+# les rollouts
+kubectl rollout history deployment
+kubectl rollout history deployment --revision 3
+kubectl describe deployments.apps app1 |grep revision
+# Les rollbacks
+kubectl rollout undo deployment app1 --to-revision 1
+kubectl diff -f nginx-deployment.yaml
+# Changer le change cause
+kubectl apply -f nginx-deployment.yaml --validate --record=true
+kubectl annotate deployments.apps app1  kubernetes.io/change-cause="image version: 1.19"
+
+# Documentation & bonnes pratiques
+kubectl api-resources
+kubectl explain deploy 
+kubectl explain deploy.spec.replicas
+kubectl explain sts.spec.replicas
+kubectl explain sts.spec.template.spec.volumes
+kubectl explain sts.spec.selector
+
+# Scale-out
+kubectl scale --replicas 10 deployment app1
+kubectl scale --replicas 5 deployment app1
+kubectl scale --replicas 0 deployment app1
+kubectl describe deployments.apps app1|grep replicas
+
+kubectl get replicasets.apps
+kubectl rollout history deployment app1
+
+# Les services
+kubectl get svc
+kbuectl describe svc app1
+kubectl get svc,endpoints -o wide

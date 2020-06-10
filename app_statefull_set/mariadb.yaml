@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: mariadb
+  name: mariadb
+  annotations:
+    kubernetes.io/change-cause: 'image version: 10.4.8'
+spec:
+  selector:
+    matchLabels:
+      app: mariadb
+  serviceName: mariadb-svc
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - image: mariadb:10.4.8
+        name: mariadb
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: 'True'
+        ports:
+          - name: mariadb-port
+            containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mariadb-svc
+  name: mariadb-svc
+spec:
+  ports:
+  - name: mariadb
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  clusterIP: None
+  selector:
+    app: mariadb
