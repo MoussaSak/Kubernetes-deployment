@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  namespace: dc01-production
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+      - image: wordpress:4.8-apache
+        name: wordpress
+        envFrom:
+          - configMapRef: {name: wordpress-cm }
+        env:
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom: { secretKeyRef: { name: wordpress-pass, key: wordpress.db.password }}
+        ports:
+        - containerPort: 80
+          name: wordpress
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 80
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 80
